@@ -101,7 +101,6 @@ def generate_voiceover(
 
 # Example usage with different multiline text formats
 if __name__ == "__main__":
-    API_KEY = "sk_d54fe6d8498018f94c35c4edfb1e779607fcf6ea495c1147"
     
    
     # Method 2: Using line breaks with \n
