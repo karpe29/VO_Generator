@@ -43,6 +43,18 @@ def main():
             st.session_state.api_key = api_key
     
     with tab1:
+        # Add instructions at the top
+        st.info("""
+        **How to generate consistent-sounding voiceovers:**
+        1. Generate VO with 'Seed Type' as 'Random'
+        2. Iterate by regenerating and/or adjusting 'Voice Settings'
+        3. Once you like the VO, copy the seed shown below the audio
+        4. To generate similar-sounding VOs:
+           - Change 'Seed Type' to 'Specific'
+           - Enter the copied seed
+           - Keep other settings the same
+        """)
+        
         if not st.session_state.api_key:
             st.warning("Please enter your API key in the Settings tab")
             return
@@ -91,45 +103,50 @@ def main():
                 st.warning("Please enter some text")
                 return
             
-            # Create voice settings
-            voice_settings = VoiceSettings(
-                stability=stability,
-                similarity_boost=similarity_boost,
-                style=style,
-                use_speaker_boost=use_speaker_boost
-            )
-            
-            # Generate filename using the original function
-            filename = generate_output_filename(script_name, voice_id, voice_settings, seed)
-            
-            try:
-                # Generate voiceover
-                generate_voiceover(
-                    text=text,
-                    output_file=filename,
-                    api_key=st.session_state.api_key,
-                    voice_id=voice_id,
-                    voice_settings=voice_settings,
-                    seed=seed
+            # Show loading spinner
+            with st.spinner('Generating voiceover...'):
+                # Create voice settings
+                voice_settings = VoiceSettings(
+                    stability=stability,
+                    similarity_boost=similarity_boost,
+                    style=style,
+                    use_speaker_boost=use_speaker_boost
                 )
                 
-                # Display audio and download button
-                st.audio(filename)
+                # Generate filename using the original function
+                filename = generate_output_filename(script_name, voice_id, voice_settings, seed)
                 
-                with open(filename, "rb") as file:
-                    st.download_button(
-                        label="Download Audio",
-                        data=file,
-                        file_name=filename,
-                        mime="audio/mpeg"
+                try:
+                    # Generate voiceover
+                    generate_voiceover(
+                        text=text,
+                        output_file=filename,
+                        api_key=st.session_state.api_key,
+                        voice_id=voice_id,
+                        voice_settings=voice_settings,
+                        seed=seed
                     )
                     
-            except Exception as e:
-                st.error(f"Error generating voice: {str(e)}")
-            finally:
-                # Clean up the file after download
-                if os.path.exists(filename):
-                    os.remove(filename)
+                    # Display audio and download button
+                    st.audio(filename)
+                    
+                    # Display the seed value
+                    st.info(f"**Current Seed:** {seed}")
+                    
+                    with open(filename, "rb") as file:
+                        st.download_button(
+                            label="Download Audio",
+                            data=file,
+                            file_name=filename,
+                            mime="audio/mpeg"
+                        )
+                        
+                except Exception as e:
+                    st.error(f"Error generating voice: {str(e)}")
+                finally:
+                    # Clean up the file after download
+                    if os.path.exists(filename):
+                        os.remove(filename)
 
 if __name__ == "__main__":
     main() 
