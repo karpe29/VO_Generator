@@ -138,7 +138,9 @@ def main():
                             label="Download Audio",
                             data=file,
                             file_name=filename,
-                            mime="audio/mpeg"
+                            mime="audio/mpeg",
+                            key=f"download_{filename}",
+                            on_click=None
                         )
                         
                 except Exception as e:
